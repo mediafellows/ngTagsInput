@@ -412,7 +412,7 @@ tagsInput.directive('tagsInput', function($timeout, $document, $window, $q, tags
                 .on('input-keydown', function(event) {
                     var key = event.keyCode,
                         addKeys = {},
-                        shouldAdd, shouldRemove, shouldSelect, shouldEditLastTag;
+                        shouldAdd, shouldRemove, shouldRemoveImmediately, shouldSelect, shouldEditLastTag;
 
                     if (tiUtil.isModifierOn(event) || hotkeys.indexOf(key) === -1) {
                         return;
@@ -423,7 +423,8 @@ tagsInput.directive('tagsInput', function($timeout, $document, $window, $q, tags
                     addKeys[KEYS.space] = options.addOnSpace;
 
                     shouldAdd = !options.addFromAutocompleteOnly && addKeys[key];
-                    shouldRemove = (key === KEYS.backspace || key === KEYS.delete) && (tagList.selected || options.removeImmediately);
+                    shouldRemove = (key === KEYS.backspace || key === KEYS.delete) && tagList.selected;
+                    shouldRemoveImmediately = (key === KEYS.backspace || key === KEYS.delete) && options.removeImmediately && tagList.items.length > 0 && ngModelCtrl.$isEmpty() && scope.newTag.text().length === 0;
                     shouldEditLastTag = key === KEYS.backspace && scope.newTag.text().length === 0 && options.enableEditingLastTag;
                     shouldSelect = (key === KEYS.backspace || key === KEYS.left || key === KEYS.right) && scope.newTag.text().length === 0 && !options.enableEditingLastTag;
 
@@ -438,7 +439,7 @@ tagsInput.directive('tagsInput', function($timeout, $document, $window, $q, tags
                             }
                         });
                     }
-                    else if (shouldRemove) {
+                    else if (shouldRemove || shouldRemoveImmediately) {
                         tagList.removeSelected();
                     }
                     else if (shouldSelect) {

@@ -5,7 +5,7 @@
  * Copyright (c) 2013-2016 Michael Benford
  * License: MIT
  *
- * Generated at 2016-09-29 14:27:40 +0000
+ * Generated at 2016-10-10 13:21:00 +0200
  */
 (function() {
 'use strict';
@@ -441,7 +441,7 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "$q", "tag
                 .on('input-keydown', function(event) {
                     var key = event.keyCode,
                         addKeys = {},
-                        shouldAdd, shouldRemove, shouldSelect, shouldEditLastTag;
+                        shouldAdd, shouldRemove, shouldRemoveImmediately, shouldSelect, shouldEditLastTag;
 
                     if (tiUtil.isModifierOn(event) || hotkeys.indexOf(key) === -1) {
                         return;
@@ -452,7 +452,8 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "$q", "tag
                     addKeys[KEYS.space] = options.addOnSpace;
 
                     shouldAdd = !options.addFromAutocompleteOnly && addKeys[key];
-                    shouldRemove = (key === KEYS.backspace || key === KEYS.delete) && (tagList.selected || options.removeImmediately);
+                    shouldRemove = (key === KEYS.backspace || key === KEYS.delete) && tagList.selected;
+                    shouldRemoveImmediately = (key === KEYS.backspace || key === KEYS.delete) && options.removeImmediately && tagList.items.length > 0 && ngModelCtrl.$isEmpty() && scope.newTag.text().length === 0;
                     shouldEditLastTag = key === KEYS.backspace && scope.newTag.text().length === 0 && options.enableEditingLastTag;
                     shouldSelect = (key === KEYS.backspace || key === KEYS.left || key === KEYS.right) && scope.newTag.text().length === 0 && !options.enableEditingLastTag;
 
@@ -467,7 +468,7 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "$q", "tag
                             }
                         });
                     }
-                    else if (shouldRemove) {
+                    else if (shouldRemove || shouldRemoveImmediately) {
                         tagList.removeSelected();
                     }
                     else if (shouldSelect) {
